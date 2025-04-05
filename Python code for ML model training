@@ -1,0 +1,83 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Machine Learning Libraries
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+
+# Read the Excel file (adjust the sheet name or path if needed)
+file_path = 'thermostat_performance_balanced_50000 latest.xlsx'
+data = pd.read_excel(file_path)
+
+# Display first few rows to understand the data structure
+print(data.head())
+
+# Assume the file has columns named "temperature_deviation", "response_time" and "label".
+# If the target variable is stored with another name (e.g., "status"), adjust accordingly.
+# For this example, we assume "label" is 1 for accurate and 0 for inaccurate.
+features = ['temperature_deviation', 'response_time']
+target = 'label'
+
+# Check for missing values and basic statistics
+print(data[features + [target]].describe())
+print(data[features + [target]].isnull().sum())
+
+# Optional: Visualize the data
+sns.scatterplot(data=data, x='temperature_deviation', y='response_time', hue=target, palette='viridis')
+plt.title('Thermostat Performance: Temperature Deviation vs Response Time')
+plt.xlabel('Temperature Deviation')
+plt.ylabel('Response Time')
+plt.show()
+
+# Split the data into training and testing sets
+X = data[features]
+y = data[target]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# ----- Logistic Regression Model -----
+log_reg = LogisticRegression(max_iter=1000)
+log_reg.fit(X_train, y_train)
+
+# Predictions and evaluation for logistic regression
+y_pred_lr = log_reg.predict(X_test)
+print("Logistic Regression Performance:")
+print(confusion_matrix(y_test, y_pred_lr))
+print(classification_report(y_test, y_pred_lr))
+print("Accuracy:", accuracy_score(y_test, y_pred_lr))
+
+# ----- Decision Tree Classifier -----
+dtree = DecisionTreeClassifier(random_state=42)
+# Optional: Hyperparameter tuning using GridSearchCV
+param_grid = {
+    'max_depth': [3, 5, 7, 10],
+    'min_samples_split': [2, 5, 10]
+}
+
+grid_search = GridSearchCV(dtree, param_grid, cv=5, scoring='accuracy')
+grid_search.fit(X_train, y_train)
+best_tree = grid_search.best_estimator_
+
+# Predictions and evaluation for decision tree
+y_pred_tree = best_tree.predict(X_test)
+print("Decision Tree Performance:")
+print(confusion_matrix(y_test, y_pred_tree))
+print(classification_report(y_test, y_pred_tree))
+print("Accuracy:", accuracy_score(y_test, y_pred_tree))
+
+# Optional: Visualize Decision Tree (requires graphviz)
+from sklearn.tree import export_graphviz
+import graphviz
+
+dot_data = export_graphviz(best_tree, out_file=None, 
+                           feature_names=features,  
+                           class_names=['inaccurate', 'accurate'],
+                           filled=True, rounded=True,  
+                           special_characters=True)  
+graph = graphviz.Source(dot_data)  
+graph.render("decision_tree")
+graph.view()
