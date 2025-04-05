@@ -1,0 +1,32 @@
+Explanation
+
+Data Loading and Inspection:
+The code reads the Excel file and prints a sample of the data so you can confirm column names and types.
+
+Feature Selection:
+It uses “temperature_deviation” and “response_time” as the input features. The target column (assumed to be named "label") indicates if a thermostat is accurate or inaccurate.
+
+Data Visualization:
+A scatter plot is provided to help visualize the relationship between the two features and the target.
+
+Train-Test Split:
+The dataset is split into training (80%) and testing (20%) sets.
+
+Model Training:
+Two models are trained:
+
+1. Logistic Regression – a baseline linear classifier.
+
+
+2. Decision Tree – along with hyperparameter tuning using GridSearchCV to find the best tree parameters.
+
+
+
+Evaluation:
+Both models are evaluated with a confusion matrix, classification report, and accuracy score.
+
+Optional Visualization:
+If you have Graphviz installed, the decision tree is exported and rendered for visualization.
+
+
+This code provides a framework to classify thermostat performance. Adjust the code based on your data’s specifics or additional features if needed.
